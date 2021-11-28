@@ -8,8 +8,8 @@
             <h3 @click="showRegister">创建账户</h3>
             <transition name="slide">
               <div v-bind:class="{show: isShowRegister}" class="register">
-                <input type="text" @input="validRegister" v-model="register.username" placeholder="用户名">
-                <input type="password" @input="validRegister" v-model="register.password" placeholder="密码">
+                <input type="text" v-model="register.username" placeholder="用户名">
+                <input type="password" v-model="register.password" placeholder="密码">
                 <p v-bind:class="{error: register.isError}">{{ register.notice }}</p>
                 <div class="button" @click="onRegister">创建账号</div>
               </div>
@@ -17,8 +17,8 @@
             <h3 @click="showLogin">登录</h3>
             <transition name="slide">
               <div v-bind:class="{show: isShowLogin}" class="login">
-                <input type="text" @input="validLogin" v-model="login.username" placeholder="输入用户名">
-                <input type="password" @input="validLogin" v-model="login.password" placeholder="密码">
+                <input type="text" v-model="login.username" placeholder="输入用户名">
+                <input type="password" v-model="login.password" placeholder="密码">
                 <p v-bind:class="{error: login.isError}">{{ login.notice }}</p>
                 <div class="button" @click="onLogin"> 登录</div>
               </div>
@@ -31,14 +31,23 @@
 </template>
 
 <script>
+import auth from "../apis/auth"
+
+auth.getInfo().then(data => {
+  console.log(data)
+})
+// request('/auth').then(data=>{
+//   console.log(data)
+// })
+
 export default {
   data() {
     return {
       isShowLogin: true,
       isShowRegister: false,
       login: {
-        username: 'hunger',
-        password: '123456',
+        username: '',
+        password: '',
         notice: '请输入用户名和密码',
         isError: true
       },
@@ -59,12 +68,12 @@ export default {
       this.isShowLogin = true;
       this.isShowRegister = false;
     },
-    validRegister() {
-      this.onRegister()
-    },
-    validLogin() {
-      this.onLogin()
-    },
+    // validRegister() {
+    //   this.onRegister()
+    // },
+    // validLogin() {
+    //   this.onLogin()
+    // },
     onRegister() {
       let result1 = this.validUsername(this.register.username)
       if (!result1.isValid) {
@@ -83,6 +92,14 @@ export default {
       this.register.notice = ''
 
       console.log('开始注册，用户名是：', this.register.username, '密码是：', this.register.password)
+      auth.register({username: this.register.username, password: this.register.password})
+        .then(data => {
+          console.log(data)
+        })
+      // request('auth/register', 'POST', {username: this.register.username, password: this.register.password})
+      //   .then(data=>{
+      //     console.log(data)
+      //   })
     },
     onLogin() {
       let result1 = this.validUsername(this.login.username)
@@ -102,6 +119,14 @@ export default {
       this.login.notice = ''
 
       console.log('开始登录，用户名是：', this.login.username, '密码是：', this.login.password)
+      auth.login({username: this.login.username, password: this.login.password})
+        .then(data => {
+          console.log(data)
+        })
+      // request('auth/login', 'POST', {username: this.login.username, password: this.login.password})
+      //   .then(data => {
+      //     console.log(data)
+      //   })
     },
     // 用户名和密码的校验
     validUsername(username) {

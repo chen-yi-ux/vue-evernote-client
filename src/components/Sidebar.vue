@@ -6,7 +6,7 @@
       <router-link to="/notebooks" title="笔记本"><i class="iconfont icon-notebook"></i></router-link>
       <router-link to="/trash/2" title="回收站"><i class="iconfont icon-trash"></i></router-link>
     </div>
-    <div class="logout" @click="onLogout">
+    <div class="logout" @click="logout">
       <i class="iconfont icon-logout"></i>
     </div>
   </div>
@@ -14,12 +14,19 @@
 
 <script>
 import Avatar from "./Avatar"
+import auth from "@/apis/auth"
 
 export default {
   components: {Avatar},
-  methods:{
-    onLogout(){
-
+  methods: {
+    logout() {
+      console.log('logout')
+      auth.logout().then(data => {
+        console.log(data)
+      })
+      // request('auth/logout').then(data => {
+      //   console.log(data)
+      // })
     }
   }
 }
