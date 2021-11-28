@@ -1,8 +1,6 @@
 import axios from 'axios'
 import baseURLConfig from './config-baseURL'
 
-console.log(baseURLConfig)
-
 axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded'
 axios.defaults.baseURL = baseURLConfig.baseURL
 axios.defaults.withCredentials = true // 表示是否使用跨域请求

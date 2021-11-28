@@ -32,10 +32,11 @@
 
 <script>
 import auth from "../apis/auth"
+import Bus from "@/helpers/bus"
 
-auth.getInfo().then(data => {
-  console.log(data)
-})
+// auth.getInfo().then(data => {
+//   console.log(data)
+// })
 // request('/auth').then(data=>{
 //   console.log(data)
 // })
@@ -88,18 +89,17 @@ export default {
         return
       }
 
-      this.register.isError = false
-      this.register.notice = ''
-
       console.log('开始注册，用户名是：', this.register.username, '密码是：', this.register.password)
       auth.register({username: this.register.username, password: this.register.password})
         .then(data => {
-          console.log(data)
-        })
-      // request('auth/register', 'POST', {username: this.register.username, password: this.register.password})
-      //   .then(data=>{
-      //     console.log(data)
-      //   })
+          this.register.isError = false
+          this.register.notice = ''
+          Bus.$emit('userInfo', {username: this.register.username})
+          this.$router.push({path: 'notebooks'})
+        }).catch(data => {
+        this.register.isError = true
+        this.register.notice = data.msg
+      })
     },
     onLogin() {
       let result1 = this.validUsername(this.login.username)
@@ -115,18 +115,17 @@ export default {
         return
       }
 
-      this.login.isError = false
-      this.login.notice = ''
-
       console.log('开始登录，用户名是：', this.login.username, '密码是：', this.login.password)
       auth.login({username: this.login.username, password: this.login.password})
         .then(data => {
-          console.log(data)
-        })
-      // request('auth/login', 'POST', {username: this.login.username, password: this.login.password})
-      //   .then(data => {
-      //     console.log(data)
-      //   })
+          this.login.isError = false
+          this.login.notice = ''
+          Bus.$emit('userInfo', {username: this.login.username})
+          this.$router.push({path: 'notebooks'})
+        }).catch(data => {
+        this.login.isError = true
+        this.login.notice = data.msg
+      })
     },
     // 用户名和密码的校验
     validUsername(username) {
