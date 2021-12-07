@@ -31,15 +31,7 @@
 </template>
 
 <script>
-import auth from "../apis/auth"
-import Bus from "@/helpers/bus"
-
-// auth.getInfo().then(data => {
-//   console.log(data)
-// })
-// request('/auth').then(data=>{
-//   console.log(data)
-// })
+import {mapActions} from 'vuex'
 
 export default {
   data() {
@@ -61,6 +53,10 @@ export default {
     }
   },
   methods: {
+    ...mapActions({
+      loginUser: 'login',
+      registerUser: 'register'
+    }),
     showRegister() {
       this.isShowRegister = true;
       this.isShowLogin = false;
@@ -69,12 +65,6 @@ export default {
       this.isShowLogin = true;
       this.isShowRegister = false;
     },
-    // validRegister() {
-    //   this.onRegister()
-    // },
-    // validLogin() {
-    //   this.onLogin()
-    // },
     onRegister() {
       let result1 = this.validUsername(this.register.username)
       if (!result1.isValid) {
@@ -89,12 +79,10 @@ export default {
         return
       }
 
-      console.log('开始注册，用户名是：', this.register.username, '密码是：', this.register.password)
-      auth.register({username: this.register.username, password: this.register.password})
-        .then(data => {
+      this.registerUser({username: this.register.username, password: this.register.password})
+        .then(() => {
           this.register.isError = false
           this.register.notice = ''
-          Bus.$emit('userInfo', {username: this.register.username})
           this.$router.push({path: 'notebooks'})
         }).catch(data => {
         this.register.isError = true
@@ -115,12 +103,10 @@ export default {
         return
       }
 
-      console.log('开始登录，用户名是：', this.login.username, '密码是：', this.login.password)
-      auth.login({username: this.login.username, password: this.login.password})
-        .then(data => {
+      this.loginUser({username: this.login.username, password: this.login.password})
+        .then(() => {
           this.login.isError = false
           this.login.notice = ''
-          Bus.$emit('userInfo', {username: this.login.username})
           this.$router.push({path: 'notebooks'})
         }).catch(data => {
         this.login.isError = true

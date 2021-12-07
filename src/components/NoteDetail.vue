@@ -1,32 +1,99 @@
 <template>
-  <div id="note-detail">
-    <h1>
-      {{ msg }} : {{ $route.params.noteId }}
-    </h1>
+  <div id="note" class="detail">
+    <NoteSidebar v-bind:notes.sync="notes"/>
+    <div class="note-detail">
+      <div class="note-empty" v-show="!curNote.id">请选择笔记</div>
+      <div v-show="curNote.id">
+        <div class="note-bar">
+          <span>创建日期：{{curNote.createdAtFriendly}}</span>
+          <span>更新日期：{{curNote.updatedAtFriendly}}</span>
+          <span>{{statusText}}</span>
+          <span class="iconfont icon-delete" @click="onDeleteNote"></span>
+          <span class="iconfont icon-fullscreen" @click="isShowPreview = !isShowPreview"></span>
+        </div>
+        <div class="note-title">
+          <input type="text" v-model="curNote.title" placeholder="输入标题" @input="onUpdateNote" @keydown="statusText='正在输入...'">
+        </div>
+        <div class="editor">
+          <textarea v-show="!isShowPreview" v-model:value="curNote.content" @input="onUpdateNote"
+                    @keydown="statusText='正在输入...'" placeholder="输入内容，支持 markdown 语法"></textarea>
+          <div class="preview markdown-body" v-html="previewContent" v-show="isShowPreview"></div>
+        </div>
+      </div>
+
+    </div>
   </div>
 </template>
 
 <script>
-import auth from "../apis/auth"
+import NoteSidebar from "./NoteSidebar"
+import _ from 'loadsh'
+import MarkdownIt from 'markdown-it'
+import {mapGetters, mapMutations, mapActions} from 'vuex'
+
+
+let md = new MarkdownIt();
 
 export default {
+  components: {NoteSidebar},
   data() {
     return {
-      msg: '笔记本详情页'
+      statusText: '笔记未改动',
+      isShowPreview: false
     }
   },
-  created(){
-    auth.getInfo().then(res => {
-      if(!res.isLogin){
-        this.$router.push({path: '/login'})
-      }
-    })
+  created() {
+    this.checkLogin({path: '/login'})
+  },
+  computed:{
+    ...mapGetters([
+      'notes',
+      'curNote'
+    ]),
+    previewContent(){
+      return md.render(this.curNote.content || '')
+    }
+  },
+  methods: {
+    ...mapMutations([
+      'setCurNote'
+    ]),
+    ...mapActions([
+      'updateNote',
+      'deleteNote',
+      'checkLogin'
+    ]),
+    onUpdateNote: _.debounce(function(){
+      if(!this.curNote.id) return
+      this.updateNote({noteId: this.curNote.id, title: this.curNote.title, content: this.curNote.content})
+      .then(data=> {
+        this.statusText = '已保存'
+      }).catch(data=>{
+        this.statusText = '保存出错'
+        console.log('error', data)
+      })
+    }, 300),
+
+    onDeleteNote(){
+      this.deleteNote({noteId: this.curNote.id}).then(data=>{
+        this.$router.replace({path: '/note'})
+      })
+    }
+  },
+  beforeRouteUpdate(to, from, next) {
+    this.setCurNote({curNoteId: parseInt(to.query.noteId)})
+    next()
   }
 }
 </script>
 
-<style scoped>
-h1 {
-  color: red;
+<style lang="less">
+@import url(../assets/css/note-detail);
+
+#note{
+  display: flex;
+  align-items: stretch;
+  background: #fff;
+  flex: 1;
 }
 </style>
